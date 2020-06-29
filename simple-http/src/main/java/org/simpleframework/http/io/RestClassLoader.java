@@ -23,17 +23,16 @@ import org.simpleframework.http.proxy.RestClientProxy;
  * @date 2020/6/17
  */
 public class RestClassLoader {
-    private Set<String> pkgSet = new HashSet<>();
-    private Set<Class<?>> clientClasses = new HashSet<>();
+    private final Set<String> pkgSet = new HashSet<>();
+    private final Set<Class<?>> clientClasses = new HashSet<>();
 
-    private RestClassLoader(String... pkgs) {
-        this.pkgSet.addAll(Arrays.asList(pkgs));
+    private RestClassLoader(String... packages) {
+        this.pkgSet.addAll(Arrays.asList(packages));
     }
 
-    public static void build(String... pkgs) {
-        final RestClassLoader rcl = new RestClassLoader(pkgs);
+    public static void build(String... packages) {
+        final RestClassLoader rcl = new RestClassLoader(packages);
         rcl.loaderClasses();
-
     }
 
     /**

@@ -28,8 +28,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ClassUtils {
-    //已加载的包
-    private static final Set<String> LOADED_PKG = new HashSet<>();
 
     /**
      * 类名替换为/

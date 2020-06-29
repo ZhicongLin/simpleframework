@@ -3,7 +3,6 @@ package org.simpleframework.context;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.simpleframework.context.annotation.BeanScan;
@@ -64,6 +63,7 @@ public class SimpleContainerLoader {
 
     /**
      * 属性注入javaBean
+     *
      * @throws ClassNotFoundException
      */
     private static void injectBean() throws ClassNotFoundException {

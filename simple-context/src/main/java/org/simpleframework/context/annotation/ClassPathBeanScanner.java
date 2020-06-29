@@ -44,7 +44,6 @@ public class ClassPathBeanScanner extends AbstractBeanScanner implements Resourc
      */
     public Set<Class<?>> getBeanClasses() {
         final Set<Class<?>> beanClasses = new HashSet<>();
-        final long l = System.currentTimeMillis();
         for (String pkg : this.pkgScanSet) {
             log.info(pkg);
             final Set<Class<?>> classes = ClassUtils.scanPackageAndGetClasses(pkg);

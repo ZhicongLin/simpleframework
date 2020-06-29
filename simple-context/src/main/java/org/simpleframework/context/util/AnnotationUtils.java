@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.simpleframework.context.annotation.Bean;
 
@@ -26,6 +25,7 @@ import org.simpleframework.context.annotation.Bean;
 public class AnnotationUtils {
 
     private static final List<String> ANN = new ArrayList<>();
+
     static {
         ANN.add(Documented.class.getName());
         ANN.add(Target.class.getName());

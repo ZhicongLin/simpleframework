@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.UUID;
 
@@ -68,55 +68,67 @@ public final class HttpExecutor {
      * @throws IOException
      */
     public static Object execute(RestObject restObject) throws Throwable {
+        final long start = System.currentTimeMillis();
         final RestFilter filter = restObject.getFilter();
         if (filter != null) {
             filter.before(restObject);
         }
-        final HttpRequestBase requestBase = getHttpRequestBase(restObject.getUrl(), restObject.getBody(),
-                restObject.getParams(), restObject.getRestMethod(), restObject.getHttpHeaders());
+        final Map<String, Object> params = restObject.getParams();
+        final String url = restObject.getUrl();
+        final String body = restObject.getBody();
+        final RestMethod restMethod = restObject.getRestMethod();
+        final Map<String, String> httpHeaders = restObject.getHttpHeaders();
+        final HttpRequestBase requestBase = getHttpRequestBase(url, body, params, restMethod, httpHeaders);
         final Logger logger = restObject.getLogger();
         logger.info(requestBase.toString());
-        logger.info("Parameter {}", restObject.getParams());
-        if (RestMethod.FILE.equals(restObject.getRestMethod())) {
-            final InputStream inputStream = getInputStream(requestBase);
-            if (filter != null) {
-                return filter.after(inputStream, restObject);
+        if (!params.isEmpty()) {
+            logger.info("> Parameter {}", params);
+        }
+        try {
+            if (RestMethod.STREAM.equals(restMethod)) {
+                final InputStream inputStream = getInputStream(requestBase, logger);
+                if (filter != null) {
+                    return filter.after(inputStream, restObject);
+                }
+                return inputStream;
             }
-            return inputStream;
+            final String result = executeClient(requestBase, logger);
+            final Object o = castResultType(result, restObject);
+            if (filter != null) {
+                return filter.after(o, restObject);
+            }
+            return o;
+        } finally {
+            logger.info("END {} {}s", requestBase.getURI(), (System.currentTimeMillis() - start) / 1000.0);
         }
-        final String result = executeClient(requestBase, logger);
-        final Object o = castResultType(result, restObject);
-        if (filter != null) {
-            return filter.after(o, restObject);
-        }
-        return o;
     }
 
-    private static InputStream getInputStream(HttpRequestBase requestBase) throws IOException {
-        final CloseableHttpClient client = HttpClients.createDefault();
-        final CloseableHttpResponse response = client.execute(requestBase);
+    private static InputStream getInputStream(HttpRequestBase requestBase, Logger logger) throws IOException {
+        final CloseableHttpResponse response = getResponse(requestBase, logger);
         final HttpEntity entity = response.getEntity();
         return entity.getContent();
     }
 
-    private static String executeClient(HttpRequestBase requestBase, Logger logger) throws IOException {
+    private static CloseableHttpResponse getResponse(HttpRequestBase requestBase, Logger logger) throws IOException {
         if (logger.isDebugEnabled()) {
             final Header[] headers = requestBase.getAllHeaders();
             for (Header header : headers) {
-                logger.debug("{}={}", header.getName(), header.getValue());
+                logger.debug("> {} = {}", header.getName(), header.getValue());
             }
         }
-
-        final CloseableHttpClient httpClient = HttpClients.createDefault();
-        final CloseableHttpResponse response = httpClient.execute(requestBase);
-
+        final CloseableHttpClient client = HttpClients.createDefault();
+        final CloseableHttpResponse response = client.execute(requestBase);
         if (logger.isDebugEnabled()) {
             final Header[] allHeaders = response.getAllHeaders();
             for (Header hd : allHeaders) {
-                logger.debug("{}={}", hd.getName(), hd.getValue());
+                logger.debug("< {} = {}", hd.getName(), hd.getValue());
             }
         }
+        return response;
+    }
 
+    private static String executeClient(HttpRequestBase requestBase, Logger logger) throws IOException {
+        final CloseableHttpResponse response = getResponse(requestBase, logger);
         final HttpEntity entity = response.getEntity();
         final int statusCode = response.getStatusLine().getStatusCode();
         String result = EntityUtils.toString(entity, DEFAULT_CHARSET);
@@ -125,7 +137,7 @@ public final class HttpExecutor {
             logger.error(result);
             throw new IllegalArgumentException(result);
         }
-        logger.trace("< {} >", result);
+        logger.trace("< Result = {} ", result);
         return result;
     }
 
@@ -144,7 +156,7 @@ public final class HttpExecutor {
         } else if (Boolean.class.isAssignableFrom(returnType) || boolean.class.isAssignableFrom(returnType)) {
             return Boolean.valueOf(result);
         } else if (returnType.isArray()) {
-            return convertJsonToArray(result, restObject.getGenericReturnType());
+            return ArrayGeneric.toArray(result, restObject.getGenericReturnType());
         } else if (restObject.isArray()) {
             return JSON.parseArray(result, restObject.getGenericReturnType());
         }
@@ -165,7 +177,7 @@ public final class HttpExecutor {
         HttpRequestBase hg = null;
         switch (restMethod) {
             case GET:
-            case FILE:
+            case STREAM:
                 hg = get(url, params);
                 break;
             case POST:
@@ -282,7 +294,15 @@ public final class HttpExecutor {
             return url;
         }
         StringBuilder sbd = new StringBuilder();
-        params.forEach((key, value) -> sbd.append(key).append("=").append(value).append(AND_SYMBOL));
+        params.forEach((key, value) -> {
+            String encode = value.toString();
+            try {
+                encode = URLEncoder.encode(encode, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                log.error(e.getMessage(), e);
+            }
+            sbd.append(key).append("=").append(encode).append(AND_SYMBOL);
+        });
         final String substr = sbd.substring(0, sbd.length() - 1);
         if (url.contains(PROGRAM_SYMBOL)) {
             url = url + AND_SYMBOL + substr;
@@ -292,20 +312,4 @@ public final class HttpExecutor {
         return url;
     }
 
-    /**
-     * 将 fastjson的JSONArray转化为泛型列表
-     *
-     * @param <T>        泛型
-     * @param json       源数据
-     * @param returnType 泛型类
-     * @return list
-     */
-    private static <T> T[] convertJsonToArray(String json, Class<T> returnType) {
-        final List<T> objectList = JSON.parseArray(json, returnType);
-        final ArrayGeneric<T> arrayGeneric = new ArrayGeneric<>(returnType, objectList.size());
-        for (T element : objectList) {
-            arrayGeneric.add(element);
-        }
-        return arrayGeneric.getQueue();
-    }
 }

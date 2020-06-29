@@ -2,6 +2,7 @@ package org.simpleframework.http.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import org.apache.commons.lang.StringUtils;
 import org.simpleframework.http.annotation.RestClient;
 import org.simpleframework.http.annotation.RestMapping;
 import org.simpleframework.http.annotation.RestMethod;
-import org.simpleframework.http.annotation.RestParamVisitor;
 import org.simpleframework.http.io.AbstractRestFilter;
 import org.simpleframework.http.io.RestFilter;
 import org.slf4j.Logger;
@@ -24,7 +24,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 /**
  * Description: Rest请求对象
@@ -79,10 +78,10 @@ public class RestObject {
     public RestObject(Method method) {
         this.method = method;
         this.clazz = method.getDeclaringClass();
-        // 处理返回类型
-        this.returnTypeHandle();
         // 处理注解
         this.annotationHandle();
+        // 处理返回类型
+        this.returnTypeHandle();
     }
 
     /**
@@ -94,12 +93,21 @@ public class RestObject {
         if (this.returnType.isArray()) {
             this.isArray = true;
             final String typeName = this.method.getGenericReturnType().getTypeName();
-            ClassUtils.getClass(typeName.replace("[]", ""));
+            this.genericReturnType = ClassUtils.getClass(typeName.replace("[]", ""));
         } else if (Collection.class.isAssignableFrom(this.returnType)) {
             this.isArray = true;
-            final Type[] actualTypeArguments = ((ParameterizedTypeImpl) this.method.getGenericReturnType()).getActualTypeArguments();
-            ClassUtils.getClass(actualTypeArguments[0].getTypeName());
+            this.genericReturnType = getActualTypeArguments(this.method.getGenericReturnType());
         }
+    }
+
+    @SneakyThrows
+    private Class<?> getActualTypeArguments(Type type) {
+        final Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+        final Type actualTypeArgument = actualTypeArguments[0];
+        if (actualTypeArgument instanceof ParameterizedType) {
+            throw new RuntimeException("无法解析[嵌套泛型]的返回值[" + clazz.getName() + "." + method.getName() + "], 可用String类型接收");
+        }
+        return ClassUtils.getClass(actualTypeArgument.getTypeName());
     }
 
     /**
@@ -140,10 +148,7 @@ public class RestObject {
         }
         final RestParamVisitor rpv = new RestParamVisitor();
         rpv.visit(parameters, arguments);
-        final String url = rpv.getUrl();
-        if (StringUtils.isNotBlank(url)) {
-            this.url = url;
-        }
+        this.url = rpv.getEncodeUrl(this.url);
         this.body = rpv.getBody();
         this.params = rpv.getParams();
         this.httpHeaders = rpv.getHeaders();
@@ -178,11 +183,13 @@ public class RestObject {
         }
         RestFilter rf = FILTERS.get(name);
         if (rf != null) {
+            this.filter = rf;
             return;
         }
         synchronized (FILTERS) {
             rf = FILTERS.get(name);
             if (rf != null) {
+                this.filter = rf;
                 return;
             }
             this.filter = this.filterClass.newInstance();

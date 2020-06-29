@@ -11,8 +11,6 @@ import org.simpleframework.context.annotation.SimpleContext;
 import org.simpleframework.context.proxy.InitializedBean;
 import org.simpleframework.context.proxy.annotation.AopListener;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
-
 /**
  * Description:
  *
@@ -30,28 +28,19 @@ public class SimpleContextHolder {
     private static final Map<Class<? extends Annotation>, Class<?>> aopAnnotations = new HashMap<>();
     private static final SimpleContext context = new SimpleContext();
     private static final List<InitializedBean> initBeans = new ArrayList<>();
+
     public static void put(String beanName, Object bean) {
         context.put(beanName, bean);
         if (bean instanceof InitializedBean) {
-            initBeans.add((InitializedBean)bean);
+            initBeans.add((InitializedBean) bean);
         }
     }
 
-    public static <T extends Object> T getBean(Class<T> clazz) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getBean(Class<T> clazz) {
         final Object object = context.get(clazz.getName());
         if (object != null) {
             return (T) object;
-        }
-        return null;
-    }
-
-    public static <T extends Object> T getBean(String name) {
-        final Set<String> keySet = context.keySet();
-        final String suffix = "." + name;
-        for (String key : keySet) {
-            if (key.endsWith(suffix)) {
-                return (T) context.get(key);
-            }
         }
         return null;
     }
