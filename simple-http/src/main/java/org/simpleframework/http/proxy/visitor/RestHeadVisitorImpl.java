@@ -23,8 +23,7 @@ public class RestHeadVisitorImpl implements ParameterVisitor<RestHead> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void visitor(RestHead ann, Object value, MethodParamVisitor mpv) {
-        RestHead restHead = (RestHead) ann;
+    public void visitor(RestHead restHead, Object value, MethodParamVisitor mpv) {
         if (value instanceof Map) {
             final Map<String, ?> headerMap = (Map<String, ?>) value;
             headerMap.forEach((k, v) -> mpv.getHeaders().put(k, String.valueOf(v)));

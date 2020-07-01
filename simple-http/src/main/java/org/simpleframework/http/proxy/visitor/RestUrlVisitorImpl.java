@@ -20,8 +20,7 @@ import org.simpleframework.http.annotation.RestURL;
 public class RestUrlVisitorImpl implements ParameterVisitor<RestURL> {
 
     @Override
-    public void visitor(RestURL ann, Object value, MethodParamVisitor mpv) {
-        RestURL restURL = (RestURL) ann;
+    public void visitor(RestURL restURL, Object value, MethodParamVisitor mpv) {
         if (value instanceof String) {
             mpv.setUrl(String.valueOf(value));
         }

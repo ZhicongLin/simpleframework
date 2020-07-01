@@ -21,8 +21,7 @@ import org.simpleframework.http.annotation.RestParam;
 public class RestParamVisitorImpl implements ParameterVisitor<RestParam> {
 
     @Override
-    public void visitor(RestParam ann, Object value, MethodParamVisitor mpv) {
-        RestParam restParam = (RestParam) ann;
+    public void visitor(RestParam restParam, Object value, MethodParamVisitor mpv) {
         final String key = restParam.value();
         if (value != null && StringUtils.isNotBlank(key)) {
             mpv.getParams().put(key, value);

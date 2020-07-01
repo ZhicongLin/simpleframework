@@ -21,8 +21,7 @@ import org.simpleframework.http.annotation.PathParam;
 public class PathParamVisitorImpl implements ParameterVisitor<PathParam> {
 
     @Override
-    public void visitor(PathParam ann, Object value, MethodParamVisitor mpv) {
-        PathParam pathParam= (PathParam)ann;
+    public void visitor(PathParam pathParam, Object value, MethodParamVisitor mpv) {
         final String key = pathParam.value();
         if (value != null && StringUtils.isNotBlank(key)) {
             mpv.getPathParams().put("{" + key + "}", value.toString());

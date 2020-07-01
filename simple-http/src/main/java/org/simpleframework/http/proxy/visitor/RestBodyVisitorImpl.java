@@ -23,7 +23,6 @@ public class RestBodyVisitorImpl implements ParameterVisitor<RestBody> {
 
     @Override
     public void visitor(RestBody ann, Object value, MethodParamVisitor mpv) {
-        RestBody restBody = (RestBody) ann;
         if (value != null) {
             mpv.setBody(JSON.toJSONString(value));
             mpv.getHeaders().put("content-type", "application/json;charset=utf-8");
