@@ -15,7 +15,7 @@ import org.simpleframework.http.annotation.RestMapping;
 import org.simpleframework.http.annotation.RestMethod;
 import org.simpleframework.http.io.AbstractRestFilter;
 import org.simpleframework.http.io.RestFilter;
-import org.simpleframework.http.proxy.visitor.RestParamVisitor;
+import org.simpleframework.http.proxy.visitor.MethodParamVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,12 +147,12 @@ public class RestObject {
                 break;
             }
         }
-        final RestParamVisitor rpv = new RestParamVisitor();
-        rpv.visit(parameters, arguments);
-        this.url = rpv.getEncodeUrl(this.url);
-        this.body = rpv.getBody();
-        this.params = rpv.getParams();
-        this.httpHeaders = rpv.getHeaders();
+        final MethodParamVisitor mpv = new MethodParamVisitor();
+        mpv.visit(parameters, arguments);
+        this.url = mpv.getEncodeUrl(this.url);
+        this.body = mpv.getBody();
+        this.params = mpv.getParams();
+        this.httpHeaders = mpv.getHeaders();
     }
 
     /**

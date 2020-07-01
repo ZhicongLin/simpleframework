@@ -23,15 +23,15 @@ public class RestHeadVisitorImpl implements ParameterVisitor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void visitor(Annotation ann, Object value, RestParamVisitor rpv) {
+    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
         RestHead restHead = (RestHead) ann;
         if (value instanceof Map) {
             final Map<String, ?> headerMap = (Map<String, ?>) value;
-            headerMap.forEach((k, v) -> rpv.getHeaders().put(k, String.valueOf(v)));
+            headerMap.forEach((k, v) -> mpv.getHeaders().put(k, String.valueOf(v)));
         } else {
             final String key = restHead.value();
             if (StringUtils.isNotBlank(key)) {
-                rpv.getHeaders().put(key, String.valueOf(value));
+                mpv.getHeaders().put(key, String.valueOf(value));
             }
         }
     }

@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Setter
-public class RestParamVisitor {
+public class MethodParamVisitor {
     private static final String METHOD_VISITOR = "visit";
     private String url;
     private String body;

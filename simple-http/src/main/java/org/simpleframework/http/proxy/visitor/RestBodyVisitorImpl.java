@@ -22,11 +22,11 @@ import com.alibaba.fastjson.JSON;
 public class RestBodyVisitorImpl implements ParameterVisitor {
 
     @Override
-    public void visitor(Annotation ann, Object value, RestParamVisitor rpv) {
+    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
         RestBody restBody = (RestBody) ann;
         if (value != null) {
-            rpv.setBody(JSON.toJSONString(value));
-            rpv.getHeaders().put("content-type", "application/json;charset=utf-8");
+            mpv.setBody(JSON.toJSONString(value));
+            mpv.getHeaders().put("content-type", "application/json;charset=utf-8");
         }
     }
 }

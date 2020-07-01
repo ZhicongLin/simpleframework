@@ -21,11 +21,11 @@ import org.simpleframework.http.annotation.PathParam;
 public class PathParamVisitorImpl implements ParameterVisitor {
 
     @Override
-    public void visitor(Annotation ann, Object value, RestParamVisitor rpv) {
+    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
         PathParam pathParam= (PathParam)ann;
         final String key = pathParam.value();
         if (value != null && StringUtils.isNotBlank(key)) {
-            rpv.getPathParams().put("{" + key + "}", value.toString());
+            mpv.getPathParams().put("{" + key + "}", value.toString());
         }
     }
 

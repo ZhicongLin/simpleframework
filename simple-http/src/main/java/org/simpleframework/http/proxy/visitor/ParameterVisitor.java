@@ -7,5 +7,5 @@ import java.util.Map;
 public interface ParameterVisitor {
     Map<String, ParameterVisitor> VISITOR_MAP = new HashMap<>();
 
-    void visitor(Annotation ann, Object value, RestParamVisitor rpv);
+    void visitor(Annotation ann, Object value, MethodParamVisitor mpv);
 }
