@@ -24,8 +24,8 @@ public enum VisitorEnum {
     private final Class<?> clazz;
 
 
-    public static <T extends Annotation> ParameterVisitor<T> getVisitor(String key, Class<T> annClazz) {
-        final VisitorEnum visitorEnum = VisitorEnum.value(key);
+    public static <T extends Annotation> ParameterVisitor<T> getVisitor(Class<T> annClazz) {
+        final VisitorEnum visitorEnum = VisitorEnum.value(annClazz.getName());
         if (visitorEnum == null) {
             return null;
         }

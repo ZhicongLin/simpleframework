@@ -48,10 +48,9 @@ public class MethodParamVisitor {
             final Annotation[] annotations = parameters[i].getAnnotations();
             if (annotations != null && annotations.length > 0) {
                 final Annotation annotation = annotations[0];
-                final Class<? extends Annotation> type = annotation.annotationType();
-                final ParameterVisitor visitor = VisitorEnum.getVisitor(type.getName(), type);
+                final ParameterVisitor visitor = VisitorEnum.getVisitor(annotation.annotationType());
                 if (visitor != null) {
-                    visitor.visitor(VisitorEnum.ann(annotation, type), arguments[i], this);
+                    visitor.visitor(VisitorEnum.ann(annotation, annotation.annotationType()), arguments[i], this);
                 }
             }
         }
