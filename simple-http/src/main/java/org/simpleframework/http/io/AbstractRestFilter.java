@@ -1,16 +1,15 @@
 package org.simpleframework.http.io;
 
-import org.apache.http.client.methods.HttpRequestBase;
 import org.simpleframework.http.proxy.RestObject;
 
 public class AbstractRestFilter implements RestFilter {
 
-    public void before(RestObject restObject) throws Throwable {
+    public void before(RestObject restObject) {
 
     }
 
     @Override
-    public Object after(Object result, RestObject restObject) throws Throwable {
+    public Object after(Object result, RestObject restObject) {
         return result;
     }
 }

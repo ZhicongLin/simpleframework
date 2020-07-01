@@ -7,7 +7,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.simpleframework.context.annotation.Bean;
 import org.simpleframework.http.io.AbstractRestFilter;
 import org.simpleframework.http.io.RestFilter;
 

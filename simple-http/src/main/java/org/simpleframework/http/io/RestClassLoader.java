@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.simpleframework.context.util.ClassUtils;
 import org.simpleframework.http.RestContextHolder;
 import org.simpleframework.http.annotation.RestClient;
 import org.simpleframework.http.proxy.RestClientProxy;
