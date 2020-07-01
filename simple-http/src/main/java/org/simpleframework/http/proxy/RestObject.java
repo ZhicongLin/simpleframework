@@ -15,6 +15,7 @@ import org.simpleframework.http.annotation.RestMapping;
 import org.simpleframework.http.annotation.RestMethod;
 import org.simpleframework.http.io.AbstractRestFilter;
 import org.simpleframework.http.io.RestFilter;
+import org.simpleframework.http.proxy.visitor.RestParamVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
