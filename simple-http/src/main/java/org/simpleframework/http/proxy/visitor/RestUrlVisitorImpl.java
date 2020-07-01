@@ -17,10 +17,10 @@ import org.simpleframework.http.annotation.RestURL;
  * </pre>
  * @date 2020/7/1
  */
-public class RestUrlVisitorImpl implements ParameterVisitor {
+public class RestUrlVisitorImpl implements ParameterVisitor<RestURL> {
 
     @Override
-    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
+    public void visitor(RestURL ann, Object value, MethodParamVisitor mpv) {
         RestURL restURL = (RestURL) ann;
         if (value instanceof String) {
             mpv.setUrl(String.valueOf(value));

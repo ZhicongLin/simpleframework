@@ -3,7 +3,6 @@ package org.simpleframework.http.proxy.visitor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -39,17 +38,20 @@ public class MethodParamVisitor {
     private final Map<String, String> pathParams = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
 
+    @SuppressWarnings({"unchecked"})
     public void visit(Parameter[] parameters, Object[] arguments) {
         if (arguments == null || arguments.length == 0) {
             return;
         }
+
         for (int i = 0; i < parameters.length; i++) {
             final Annotation[] annotations = parameters[i].getAnnotations();
             if (annotations != null && annotations.length > 0) {
                 final Annotation annotation = annotations[0];
-                final ParameterVisitor visitor = VisitorEnum.getVisitor(annotation.annotationType().getName());
+                final Class<? extends Annotation> type = annotation.annotationType();
+                final ParameterVisitor visitor = VisitorEnum.getVisitor(type.getName(), type);
                 if (visitor != null) {
-                    visitor.visitor(annotation, arguments[i], this);
+                    visitor.visitor(VisitorEnum.ann(annotation, type), arguments[i], this);
                 }
             }
         }

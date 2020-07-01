@@ -18,10 +18,10 @@ import org.simpleframework.http.annotation.RestParam;
  * </pre>
  * @date 2020/7/1
  */
-public class RestParamVisitorImpl implements ParameterVisitor {
+public class RestParamVisitorImpl implements ParameterVisitor<RestParam> {
 
     @Override
-    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
+    public void visitor(RestParam ann, Object value, MethodParamVisitor mpv) {
         RestParam restParam = (RestParam) ann;
         final String key = restParam.value();
         if (value != null && StringUtils.isNotBlank(key)) {

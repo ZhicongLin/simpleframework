@@ -18,10 +18,10 @@ import org.simpleframework.http.annotation.PathParam;
  * </pre>
  * @date 2020/7/1
  */
-public class PathParamVisitorImpl implements ParameterVisitor {
+public class PathParamVisitorImpl implements ParameterVisitor<PathParam> {
 
     @Override
-    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
+    public void visitor(PathParam ann, Object value, MethodParamVisitor mpv) {
         PathParam pathParam= (PathParam)ann;
         final String key = pathParam.value();
         if (value != null && StringUtils.isNotBlank(key)) {

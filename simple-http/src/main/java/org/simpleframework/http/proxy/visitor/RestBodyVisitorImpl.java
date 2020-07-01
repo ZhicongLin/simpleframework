@@ -19,10 +19,10 @@ import com.alibaba.fastjson.JSON;
  * </pre>
  * @date 2020/7/1
  */
-public class RestBodyVisitorImpl implements ParameterVisitor {
+public class RestBodyVisitorImpl implements ParameterVisitor<RestBody> {
 
     @Override
-    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
+    public void visitor(RestBody ann, Object value, MethodParamVisitor mpv) {
         RestBody restBody = (RestBody) ann;
         if (value != null) {
             mpv.setBody(JSON.toJSONString(value));

@@ -19,11 +19,11 @@ import org.simpleframework.http.annotation.RestHead;
  * </pre>
  * @date 2020/7/1
  */
-public class RestHeadVisitorImpl implements ParameterVisitor {
+public class RestHeadVisitorImpl implements ParameterVisitor<RestHead> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void visitor(Annotation ann, Object value, MethodParamVisitor mpv) {
+    public void visitor(RestHead ann, Object value, MethodParamVisitor mpv) {
         RestHead restHead = (RestHead) ann;
         if (value instanceof Map) {
             final Map<String, ?> headerMap = (Map<String, ?>) value;
