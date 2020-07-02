@@ -119,14 +119,15 @@ public class RestObject {
         if (client != null) {
             this.filterClass = client.filter() != AbstractRestFilter.class ? client.filter() : null;
             final RestMapping rmAnn = method.getAnnotation(RestMapping.class);
-            if (rmAnn != null) {
-                this.url = this.urlHandle(client.url(), rmAnn.url());
-                this.restMethod = rmAnn.method();
-                this.logger = LoggerFactory.getLogger(clazz.getName() + "." + method.getName());
-                this.filterClass = rmAnn.filter() != AbstractRestFilter.class ? rmAnn.filter() : this.filterClass;
-                this.ignoreFilter = rmAnn.ignoreFilter();
-                this.createFilterInstance();
+            if (rmAnn == null) {
+                return;
             }
+            this.url = this.urlHandle(client.url(), rmAnn.url());
+            this.restMethod = rmAnn.method();
+            this.logger = LoggerFactory.getLogger(clazz.getName() + "." + method.getName());
+            this.filterClass = rmAnn.filter() != AbstractRestFilter.class ? rmAnn.filter() : this.filterClass;
+            this.ignoreFilter = rmAnn.ignoreFilter();
+            this.initlizedFilterInstance();
         }
     }
 
@@ -174,7 +175,7 @@ public class RestObject {
     }
 
     @SneakyThrows
-    private void createFilterInstance() {
+    private void initlizedFilterInstance() {
         if (ignoreFilter || filterClass == null) {
             return;
         }
@@ -182,19 +183,16 @@ public class RestObject {
         if (name.equals(AbstractRestFilter.class.getName()) || name.equals(RestFilter.class.getName())) {
             return;
         }
-        RestFilter rf = FILTERS.get(name);
-        if (rf != null) {
-            this.filter = rf;
+        this.filter = FILTERS.get(name);
+        if (this.filter != null) {
             return;
         }
         synchronized (FILTERS) {
-            rf = FILTERS.get(name);
-            if (rf != null) {
-                this.filter = rf;
-                return;
+            this.filter = FILTERS.get(name);
+            if (this.filter == null) {
+                this.filter = this.filterClass.newInstance();
+                FILTERS.put(name, this.filter);
             }
-            this.filter = this.filterClass.newInstance();
-            FILTERS.put(name, this.filter);
         }
     }
 
