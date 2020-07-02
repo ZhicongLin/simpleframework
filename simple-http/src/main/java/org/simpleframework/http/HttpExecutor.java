@@ -64,6 +64,7 @@ public final class HttpExecutor {
     private static final String AND_SYMBOL = "&";
     private static final String PROGRAM_SYMBOL = "?";
     private static int retryCount = 3;
+
     /**
      * 执行请求
      *
@@ -304,6 +305,7 @@ public final class HttpExecutor {
 
     /**
      * 设置重试次数
+     *
      * @param retryCount
      */
     public static void setRetryCount(int retryCount) {

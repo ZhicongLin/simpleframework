@@ -27,6 +27,7 @@ public class ArrayGeneric<T> {
 
     /**
      * 构建数组
+     *
      * @param clazz
      * @param size
      */

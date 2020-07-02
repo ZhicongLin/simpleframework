@@ -18,8 +18,10 @@ public @interface RestMapping {
     String url() default "";
 
     RestMethod method() default RestMethod.GET;
+
     // 添加拦截器
     Class<? extends RestFilter> filter() default AbstractRestFilter.class;
+
     // 忽略拦截器
     boolean ignoreFilter() default false;
 }

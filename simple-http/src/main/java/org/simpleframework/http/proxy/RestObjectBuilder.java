@@ -33,6 +33,7 @@ public class RestObjectBuilder {
 
     /**
      * 创建构建器
+     *
      * @param method
      * @param arguments
      * @return
@@ -43,6 +44,7 @@ public class RestObjectBuilder {
 
     /**
      * 构建请求对象
+     *
      * @return
      */
     public RestObject build() throws Throwable {
@@ -59,6 +61,7 @@ public class RestObjectBuilder {
 
     /**
      * 创建一个请求对象
+     *
      * @param method
      * @return
      */

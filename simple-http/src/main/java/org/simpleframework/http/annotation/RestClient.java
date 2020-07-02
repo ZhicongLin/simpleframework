@@ -20,5 +20,5 @@ public @interface RestClient {
 
     Class<?> fallback() default Void.class;
 
-    Class<? extends RestFilter> filter()  default AbstractRestFilter.class;
+    Class<? extends RestFilter> filter() default AbstractRestFilter.class;
 }
