@@ -140,10 +140,10 @@ public class RestObject {
             return;
         }
         final Parameter[] parameters = method.getParameters();
-        for (Object parameter : arguments) {
-            final String name = parameter.getClass().getName();
+        for (int i = 0; i < parameters.length; i++) {
+            final String name = parameters[i].getType().getName();
             if (RestMethod.class.getName().equals(name)) {
-                this.restMethod = (RestMethod) parameter;
+                this.restMethod = (RestMethod) arguments[i];
                 break;
             }
         }

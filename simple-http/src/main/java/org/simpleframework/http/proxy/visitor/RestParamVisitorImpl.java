@@ -1,10 +1,9 @@
 package org.simpleframework.http.proxy.visitor;
 
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.simpleframework.http.annotation.RestParam;
 import org.simpleframework.http.proxy.MethodParamVisitor;
+import org.simpleframework.http.proxy.visitor.exception.RestParameterNullValueException;
 
 /**
  * Description: 处理RestParam的参数
@@ -22,25 +21,22 @@ import org.simpleframework.http.proxy.MethodParamVisitor;
 public class RestParamVisitorImpl implements ParameterVisitor<RestParam> {
 
     @Override
-    @SuppressWarnings({"unchecked"})
     public void visitor(RestParam restParam, Object value, MethodParamVisitor mpv) {
         if (value == null) {
+            if (restParam.require()) {
+                throw new RestParameterNullValueException("RestParam");
+            }
             return;
         }
         final String key = restParam.value();
         if (StringUtils.isNotBlank(key)) {
             if (value.getClass().isArray()) {
                 mpv.getParams().put(key, StringUtils.join((Object[]) value, ","));
+            } else if (BASE_TYPE.contains(value.getClass().getName())) {
+                mpv.getParams().put(key, value.toString());
             } else {
-                final String name = value.getClass().getName();
-                if (BASE_TYPE.contains(name)) {
-                    mpv.getParams().put(key, value.toString());
-                } else {
-                    push(mpv.getParams(), key, value);
-                }
+                push(mpv.getParams(), key, value);
             }
-        } else if (value instanceof Map) {
-            mpv.getParams().putAll((Map<? extends String, ?>) value);
         } else {
             push(mpv.getParams(), key, value);
         }

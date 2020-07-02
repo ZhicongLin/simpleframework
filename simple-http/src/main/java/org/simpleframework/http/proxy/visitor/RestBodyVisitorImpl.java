@@ -4,6 +4,7 @@ import org.apache.http.Consts;
 import org.apache.http.entity.ContentType;
 import org.simpleframework.http.annotation.RestBody;
 import org.simpleframework.http.proxy.MethodParamVisitor;
+import org.simpleframework.http.proxy.visitor.exception.RestParameterNullValueException;
 
 import com.alibaba.fastjson.JSON;
 
@@ -24,9 +25,10 @@ public class RestBodyVisitorImpl implements ParameterVisitor<RestBody> {
 
     @Override
     public void visitor(RestBody ann, Object value, MethodParamVisitor mpv) {
-        if (value != null) {
-            mpv.setBody(JSON.toJSONString(value));
-            mpv.getHeaders().put("Content-Type", ContentType.APPLICATION_JSON.withCharset(Consts.UTF_8).toString());
+        if (value == null) {
+            throw new RestParameterNullValueException("RestBody");
         }
+        mpv.setBody(JSON.toJSONString(value));
+        mpv.getHeaders().put("Content-Type", ContentType.APPLICATION_JSON.withCharset(Consts.UTF_8).toString());
     }
 }

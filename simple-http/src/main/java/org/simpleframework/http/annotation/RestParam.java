@@ -13,4 +13,6 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface RestParam {
     String value() default "";
+
+    boolean require() default false;
 }

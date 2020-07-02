@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 public @interface RestBody {
-
-
+    boolean require() default false;
 }
