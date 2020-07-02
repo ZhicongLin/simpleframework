@@ -5,7 +5,12 @@
     @Bean扫描，并放入容器操作
     
 ##simple-http
-
+    
+    单独使用这个包的时候
+    1.RestClassLoader.build(。包名。) 服务启动或者在使用之前执行，开启扫描
+    2.RestContextHolder.getBean({interfaceClass})获取调用实例
+    
+    此包提供了类、方法、参数等注解
     @RestClient 类注解，http请求的interface，标记请求的组，并会正常javabean的代理类
         参数 url 链接 如：http://localhost:8080/abc;
             ps: 
@@ -57,7 +62,12 @@
     
 ##simple-http-spring  结合spring使用的时候，则需要引用这个包
     
-    提供@EnableRestClients注解，注解时才会默认扫描注解类下对应的所有包，开启@RestClient
+     无需以下两个步骤
+     1.RestClassLoader.build(。包名。) 服务启动或者在使用之前执行，开启扫描
+     2.RestContextHolder.getBean({interfaceClass})获取调用实例
+    
+    包提供@EnableRestClients注解，注解时才会默认扫描注解类下对应的所有包，开启@RestClient
+    以@Resource或者@Autowire等方式注入即可
     application.properties配置文件中，提供simple.http.retry配置，类型为int，
         表示http请求，如果结果请求失败，且结果为502，503，504时，重试请求，默认次数3次
     
