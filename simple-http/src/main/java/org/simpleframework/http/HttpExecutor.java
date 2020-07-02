@@ -270,16 +270,17 @@ public final class HttpExecutor {
 
     private static HttpEntity createMultipartEntity(Map<String, Object> param) {
         final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        param.forEach((key, value) -> builder.addPart(createBodyPart(key, value)));
+        param.forEach((key, value) -> builder.addPart(createBodyPart(key, value, param.get("fileName"))));
         return builder.build();
     }
 
-    private static FormBodyPart createBodyPart(String key, Object value) {
+    private static FormBodyPart createBodyPart(String key, Object value, Object name) {
         ContentBody body;
         if (value instanceof File) {
             body = new FileBody((File) value);
         } else if (value instanceof InputStream) {
-            body = new InputStreamBody((InputStream) value, UUID.randomUUID().toString());
+            String fileName = name != null ? name.toString() : UUID.randomUUID().toString();
+            body = new InputStreamBody((InputStream) value, fileName);
         } else {
             body = new StringBody(value.toString(), ContentType.create("text/plain", Consts.UTF_8));
         }
