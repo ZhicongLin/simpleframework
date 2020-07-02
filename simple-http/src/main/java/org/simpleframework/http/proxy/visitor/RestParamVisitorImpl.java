@@ -1,9 +1,8 @@
 package org.simpleframework.http.proxy.visitor;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.commons.lang.StringUtils;
 import org.simpleframework.http.annotation.RestParam;
+import org.simpleframework.http.proxy.MethodParamVisitor;
 
 /**
  * Description: 处理RestParam的参数

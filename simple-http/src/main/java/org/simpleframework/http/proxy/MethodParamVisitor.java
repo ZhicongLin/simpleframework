@@ -1,4 +1,4 @@
-package org.simpleframework.http.proxy.visitor;
+package org.simpleframework.http.proxy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.simpleframework.http.proxy.visitor.ParameterVisitor;
+import org.simpleframework.http.proxy.visitor.VisitorEnum;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -39,7 +41,7 @@ public class MethodParamVisitor {
     private final Map<String, String> headers = new HashMap<>();
 
     @SuppressWarnings({"unchecked"})
-    public void visit(Parameter[] parameters, Object[] arguments) {
+    private void visit(Parameter[] parameters, Object[] arguments) {
         if (arguments == null || arguments.length == 0) {
             return;
         }
@@ -56,8 +58,12 @@ public class MethodParamVisitor {
         }
     }
 
-    @SneakyThrows
-    public String getEncodeUrl(String url) {
+    /**
+     * 解析并构建url
+     * @param url
+     * @return
+     */
+    public String getEncodeUrl(String url) throws Throwable {
         String result = url;
         if (StringUtils.isNotBlank(this.url)) {
             result = this.url;
@@ -72,5 +78,17 @@ public class MethodParamVisitor {
             result = result.replace(key, URLEncoder.encode(replacement, "utf-8"));
         }
         return result;
+    }
+
+    /**
+     * 创建方法参数解析器
+     * @param parameters
+     * @param arguments
+     * @return
+     */
+    public static MethodParamVisitor build(Parameter[] parameters, Object[] arguments) {
+        final MethodParamVisitor methodParamVisitor = new MethodParamVisitor();
+        methodParamVisitor.visit(parameters, arguments);
+        return methodParamVisitor;
     }
 }

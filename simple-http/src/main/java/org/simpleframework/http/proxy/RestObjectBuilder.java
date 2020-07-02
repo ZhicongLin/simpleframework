@@ -45,7 +45,7 @@ public class RestObjectBuilder {
      * 构建请求对象
      * @return
      */
-    public RestObject build() {
+    public RestObject build() throws Throwable {
         RestObject ro = RestContextHolder.getRestBean(this.method);
         if (ro == null) {
             ro = newRestObject(this.method);

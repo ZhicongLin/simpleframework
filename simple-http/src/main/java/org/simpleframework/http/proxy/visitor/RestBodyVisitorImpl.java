@@ -1,10 +1,9 @@
 package org.simpleframework.http.proxy.visitor;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.http.Consts;
 import org.apache.http.entity.ContentType;
 import org.simpleframework.http.annotation.RestBody;
+import org.simpleframework.http.proxy.MethodParamVisitor;
 
 import com.alibaba.fastjson.JSON;
 

@@ -63,7 +63,7 @@ public final class HttpExecutor {
     private static final String DEFAULT_CHARSET = "UTF-8";
     private static final String AND_SYMBOL = "&";
     private static final String PROGRAM_SYMBOL = "?";
-
+    private static int retryCount = 3;
     /**
      * 执行请求
      *
@@ -80,15 +80,16 @@ public final class HttpExecutor {
         }
         final HttpRequestBase requestBase = getHttpRequestBase(restObject);
 
+        int rc = retryCount;
         try {
             logger.info(requestBase.toString());
             if (!restObject.getParams().isEmpty()) {
-                logger.info("> Parameter {}", restObject.getParams());
+                logger.info("> Request: {}", restObject.getParams());
             }
 
             if (RestMethod.STREAM.equals(restObject.getRestMethod())
                     || InputStream.class.isAssignableFrom(restObject.getReturnType())) {
-                InputStream is = getInputStream(requestBase, logger);
+                InputStream is = getInputStream(requestBase, logger, rc);
                 final Class<?> grt = restObject.getGenericReturnType();
                 if (restObject.getReturnType().isArray() && (byte.class.isAssignableFrom(grt) || Byte.class.isAssignableFrom(grt))) {
                     byte[] bytes = IOUtils.toByteArray(is);
@@ -97,38 +98,40 @@ public final class HttpExecutor {
                 return filter == null ? is : filter.after(is, restObject);
             }
 
-            final Object result = executeClient(requestBase, restObject);
+            final Object result = executeClient(requestBase, restObject, rc);
             return filter == null ? result : filter.after(result, restObject);
         } finally {
             logger.info("END {} {}s", requestBase.getURI(), (System.currentTimeMillis() - start) / 1000.0);
         }
     }
 
-    private static InputStream getInputStream(HttpRequestBase requestBase, Logger logger) throws IOException {
+    private static InputStream getInputStream(HttpRequestBase requestBase, Logger logger, int retryCount) throws IOException {
         final CloseableHttpResponse response = getResponse(requestBase, logger);
         final HttpEntity entity = response.getEntity();
+        final int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode != HttpStatus.SC_OK) {
+            final String errorResult = EntityUtils.toString(entity, DEFAULT_CHARSET);
+            response.close();
+            logger.error(errorResult);
+            //502,503,504 重试请求
+            if (statusCode >= HttpStatus.SC_BAD_GATEWAY && statusCode <= HttpStatus.SC_GATEWAY_TIMEOUT && retryCount > 0) {
+                return getInputStream(requestBase, logger, --retryCount);
+            }
+            throw new IllegalArgumentException(errorResult);
+        }
         return entity.getContent();
     }
 
-    private static CloseableHttpResponse getResponse(HttpRequestBase requestBase, Logger logger) throws IOException {
-        if (logger.isDebugEnabled()) {
-            final Header[] headers = requestBase.getAllHeaders();
-            for (Header header : headers) {
-                logger.debug("> {} = {}", header.getName(), header.getValue());
-            }
-        }
-        final CloseableHttpClient client = HttpClients.createDefault();
-        final CloseableHttpResponse response = client.execute(requestBase);
-        if (logger.isDebugEnabled()) {
-            final Header[] allHeaders = response.getAllHeaders();
-            for (Header hd : allHeaders) {
-                logger.debug("< {} = {}", hd.getName(), hd.getValue());
-            }
-        }
-        return response;
-    }
-
-    private static Object executeClient(HttpRequestBase requestBase, RestObject restObject) throws IOException {
+    /**
+     * 执行客户端请求
+     *
+     * @param requestBase 请求信息
+     * @param restObject  请求原始信息
+     * @param retryCount  重试次数
+     * @return ReturnType
+     * @throws IOException
+     */
+    private static Object executeClient(HttpRequestBase requestBase, RestObject restObject, int retryCount) throws IOException {
         final CloseableHttpResponse response = getResponse(requestBase, restObject.getLogger());
         final HttpEntity entity = response.getEntity();
         final int statusCode = response.getStatusLine().getStatusCode();
@@ -136,10 +139,32 @@ public final class HttpExecutor {
         response.close();
         if (statusCode != HttpStatus.SC_OK) {
             restObject.getLogger().error(result);
+            //502,503,504 重试请求
+            if (statusCode >= HttpStatus.SC_BAD_GATEWAY && statusCode <= HttpStatus.SC_GATEWAY_TIMEOUT) {
+                return executeClient(requestBase, restObject, --retryCount);
+            }
             throw new IllegalArgumentException(result);
         }
-        restObject.getLogger().trace("< Result = {} ", result);
+        restObject.getLogger().trace("< Response: {} ", result);
         return castObjectToReturnType(result, restObject);
+    }
+
+    private static CloseableHttpResponse getResponse(HttpRequestBase requestBase, Logger logger) throws IOException {
+        if (logger.isDebugEnabled()) {
+            final Header[] headers = requestBase.getAllHeaders();
+            for (Header header : headers) {
+                logger.debug("> {}={}", header.getName(), header.getValue());
+            }
+        }
+        final CloseableHttpClient client = HttpClients.createDefault();
+        final CloseableHttpResponse response = client.execute(requestBase);
+        if (logger.isDebugEnabled()) {
+            final Header[] allHeaders = response.getAllHeaders();
+            for (Header hd : allHeaders) {
+                logger.debug("< {}={}", hd.getName(), hd.getValue());
+            }
+        }
+        return response;
     }
 
     private static Object castObjectToReturnType(String result, RestObject restObject) {
@@ -276,4 +301,11 @@ public final class HttpExecutor {
         return url + (url.contains(PROGRAM_SYMBOL) ? AND_SYMBOL : PROGRAM_SYMBOL) + sbd.substring(0, sbd.length() - 1);
     }
 
+    /**
+     * 设置重试次数
+     * @param retryCount
+     */
+    public static void setRetryCount(int retryCount) {
+        HttpExecutor.retryCount = retryCount;
+    }
 }

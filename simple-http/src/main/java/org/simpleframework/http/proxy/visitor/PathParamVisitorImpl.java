@@ -1,9 +1,8 @@
 package org.simpleframework.http.proxy.visitor;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.commons.lang.StringUtils;
 import org.simpleframework.http.annotation.PathParam;
+import org.simpleframework.http.proxy.MethodParamVisitor;
 
 /**
  * Description: 处理PathParam的参数

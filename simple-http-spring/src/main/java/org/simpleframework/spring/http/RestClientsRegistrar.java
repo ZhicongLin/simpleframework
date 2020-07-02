@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.simpleframework.http.HttpExecutor;
 import org.simpleframework.http.io.RestClassLoader;
 import org.simpleframework.http.proxy.RestObjectBuilder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -25,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
  * RestClient Registrar SpringContext
  */
 @Slf4j
-@Setter
 public class RestClientsRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
     private Environment environment;
 
@@ -78,4 +79,13 @@ public class RestClientsRegistrar implements ImportBeanDefinitionRegistrar, Envi
         return basePackages;
     }
 
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+        // 重试次数配置
+        final String property = this.environment.getProperty("simple.http.retry");
+        if (StringUtils.isNotBlank(property)) {
+            HttpExecutor.setRetryCount(Integer.parseInt(property.trim()));
+        }
+    }
 }

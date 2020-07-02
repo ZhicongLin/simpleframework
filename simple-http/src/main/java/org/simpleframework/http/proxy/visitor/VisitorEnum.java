@@ -50,7 +50,7 @@ public enum VisitorEnum {
         return parameterVisitor;
     }
 
-    static <T extends Annotation> T ann(Annotation annotation, Class<T> clazz) {
+    public static <T extends Annotation> T ann(Annotation annotation, Class<T> clazz) {
         return (T) annotation;
     }
 
