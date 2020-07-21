@@ -98,7 +98,7 @@ public class RestClientScannerConfigurer {
             if (attributes != null) {
                 final Boolean enableFallback = this.environment.getProperty("cgcg.rest.fallback.enable", Boolean.class);
                 final Object fallback = attributes.get(Constant.PROXY_FALLBACK_KEY);
-                if ((enableFallback == null || enableFallback) && fallback != Void.class) {
+                if ((enableFallback == null || enableFallback) && (fallback != Void.class && fallback != null)) {
                     final Object bean = ((Class<?>) fallback).newInstance();
                     builder.addPropertyValue(Constant.PROXY_FALLBACK_BEAN_KEY, bean);
                 }

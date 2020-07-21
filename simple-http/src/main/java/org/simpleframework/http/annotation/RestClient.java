@@ -19,4 +19,6 @@ public @interface RestClient {
     String url() default "";
 
     Class<? extends RestFilter> filter() default AbstractRestFilter.class;
+
+    Class<?> callback() default Void.class;
 }

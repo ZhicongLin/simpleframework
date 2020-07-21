@@ -1,6 +1,7 @@
 package org.simpleframework.http.proxy;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import org.simpleframework.http.proxy.visitor.VisitorEnum;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,14 +34,13 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 public class MethodParamVisitor {
-    private static final String METHOD_VISITOR = "visit";
+    private static final String METHOD_VISITOR = "visitor";
     private String url;
     private String body;
     private final Map<String, Object> params = new HashMap<>();
     private final Map<String, String> pathParams = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
 
-    @SuppressWarnings({"unchecked"})
     private void visit(Parameter[] parameters, Object[] arguments) {
         if (arguments == null || arguments.length == 0) {
             return;
@@ -47,14 +48,23 @@ public class MethodParamVisitor {
 
         for (int i = 0; i < parameters.length; i++) {
             final Annotation[] annotations = parameters[i].getAnnotations();
-            if (annotations != null && annotations.length > 0) {
-                final Annotation annotation = annotations[0];
-                final ParameterVisitor visitor = VisitorEnum.getVisitor(annotation.annotationType());
-                if (visitor != null) {
-                    visitor.visitor(VisitorEnum.ann(annotation, annotation.annotationType()), arguments[i], this);
-                }
+            if (annotations == null || annotations.length <= 0) {
+                continue;
             }
+            final Annotation annotation = annotations[0];
+            this.invokeVisitor(annotation, arguments[i]);
         }
+    }
+
+    @SneakyThrows
+    private void invokeVisitor(Annotation annotation, Object argument) {
+        final ParameterVisitor<?> pv = VisitorEnum.getVisitor(annotation.annotationType());
+        if (pv == null) {
+            return;
+        }
+        final Class<?>[] paramTypes = new Class[]{annotation.annotationType(), argument.getClass(), MethodParamVisitor.class};
+        final Method method = pv.getClass().getDeclaredMethod(METHOD_VISITOR, Annotation.class, Object.class, MethodParamVisitor.class);
+        method.invoke(pv, VisitorEnum.ann(annotation, annotation.annotationType()), argument, this);
     }
 
     /**
